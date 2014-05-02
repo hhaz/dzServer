@@ -23,8 +23,10 @@ DZProvider.prototype.getCollection= function(collectionName, callback) {
   });
 };
 
-DZProvider.prototype.DZCheck = function(longitude,latitude,callback) {
+DZProvider.prototype.findClosestDZ = function(longitude,latitude,callback) {
   var resultArray = [];
+  var minDist = 3;
+  var closestDZ = null;
     this.getCollection('dz', function(error, dz_collection) {
       if( error ) callback(error)
       else {
@@ -46,7 +48,6 @@ DZProvider.prototype.DZCheck = function(longitude,latitude,callback) {
 
                 if( d < 2) {
                   resultArray.push(elem);
-                  //console.log("match d = " + d + " long = " + elem.longitude + " latitude = " + elem.latitude);
                 }
               });
               callback(resultArray);

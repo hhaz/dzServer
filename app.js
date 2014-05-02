@@ -49,18 +49,26 @@ app.set('view options', { layout: true });
 app.set('view options', { pretty: true });
 app.locals.pretty = true; 
 
-app.get('/api/checkDZ', function(req,res) { // call : https://localhost/api/checkDZ?latitude=48.78646&longitude=2.17189
+app.get('/api/findClosestDZ', function(req,res) { // call : http://localhost:3000/api/findClosestDZ?latitude=48.78646&longitude=2.17189
   latitude = req.query["latitude"];
   longitude = req.query["longitude"];
 
-  console.time("dzCheck");
-  DZProvider.DZCheck( longitude, latitude, function (result) {
- 	result.forEach( function(elem) {
- 		console.log("long = " + elem.longitude + " latitude = " + elem.latitude);
- 	});
+console.log("yo");
+
+  var ip = req.headers['x-forwarded-for'] || 
+     req.connection.remoteAddress || 
+     req.socket.remoteAddress ||
+     req.connection.socket.remoteAddress;
+
+  var now = new Date();
+
+  console.log(now + " - Received request from " + ip + " for longitude = " + longitude + " latitude = " + latitude);
+  
+  console.time("findClosestDZ");
+  DZProvider.findClosestDZ( longitude, latitude, function (result) {
     res.send(result);
 	});
-  console.timeEnd("dzCheck");
+  console.timeEnd("findClosestDZ");
 
 });
 
