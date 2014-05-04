@@ -7,6 +7,7 @@ var MemoryStore = express.session.MemoryStore;
 var https = require('https');
 var DZProvider = require('./DZProvider-mongodb').DZProvider;
 var crypto = require('crypto');
+var apns = require("apns"), options, connection, notification;
 
 var options = {
   key: fs.readFileSync('./server.key'),
@@ -49,11 +50,10 @@ app.set('view options', { layout: true });
 app.set('view options', { pretty: true });
 app.locals.pretty = true; 
 
-app.get('/api/findClosestDZ', function(req,res) { // call : http://localhost:3000/api/findClosestDZ?latitude=48.78646&longitude=2.17189
+app.get('/api/findClosestDZ', function(req,res) { // call : http://localhost:3000/api/findClosestDZ?latitude=48.78646&longitude=2.17189&distance=2000
   latitude = req.query["latitude"];
   longitude = req.query["longitude"];
-
-console.log("yo");
+  distance = req.query["distance"];
 
   var ip = req.headers['x-forwarded-for'] || 
      req.connection.remoteAddress || 
@@ -62,16 +62,43 @@ console.log("yo");
 
   var now = new Date();
 
-  console.log(now + " - Received request from " + ip + " for longitude = " + longitude + " latitude = " + latitude);
+  console.log(now + " - Received request from " + ip + " for longitude = " + longitude + " latitude = " + latitude + " distance = " + distance);
   
   console.time("findClosestDZ");
-  DZProvider.findClosestDZ( longitude, latitude, function (result) {
+  DZProvider.findClosestDZ( longitude, latitude, distance, function (result) {
     res.send(result);
 	});
   console.timeEnd("findClosestDZ");
 
 });
 
+app.get('/api/findAllDZ', function(req,res) { // call : http://localhost:3000/api/findClosestDZ?latitude=48.78646&longitude=2.17189&distance=2000
+  var ip = req.headers['x-forwarded-for'] || 
+     req.connection.remoteAddress || 
+     req.socket.remoteAddress ||
+     req.connection.socket.remoteAddress;
+  
+  var now = new Date();
+  console.log(now + " - Received request from " + ip + " for all DZ");
+
+  console.time("findAllDZ");
+  DZProvider.findAllDZ( function (result) {
+    res.send(result);
+  });
+  console.timeEnd("findAllDZ");
+});
+
+app.get('/api/addDevice', function(req,res) {
+  DZProvider.addDevice( req.param('deviceid'), function(result) {
+      res.send(result);
+  });
+});
+
+app.get('/api/notifNewDZ', function(req,res) {  
+  DZProvider.sendAPN( function (result) {
+    res.send(result + " notifications sent");
+  });
+});
 
 app.listen(3000);
 
