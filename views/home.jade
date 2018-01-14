@@ -1,0 +1,36 @@
+extend layout
+block connectedDevices
+  <div class="scroll">
+  table(id="tableDevices")
+    th deviceID
+    th lastDate
+    tr(style="vertical-align: top;")
+    - for device in devices
+      <td class='altDevice'>#{device.deviceID}</td>
+      <td class='altDate'>#{device.lastDate}</td>
+      <tr/>
+block dz
+  <div class="scroll">
+  table(id="tableDZ",cellspacing=0)
+    th Longitude
+    th Latitude
+    th Description
+     tr(style="vertical-align: top;")
+     - for dz in dzs
+      <td class='altLongitude'>#{dz.longitude}</td>
+      <td class='altLatitude'>#{dz.latitude}</td>
+      <td class='altDescription'>#{dz.description}</td>
+      <tr/>
+block countdz
+  <div>	
+  hr
+  p #{countdz} Danger Zones Available  
+  form(id="uploadFile", method="post", action="/upload", enctype="multipart/form-data")
+   input(type="file", multiple, name="fileNames")
+   input(type='submit',value="Upload")
+   input(type='submit',value="Send Notif", formaction="sendNotif")
+  br
+block ipa
+  <div> 
+  h3 Download IPA
+  a(href="itms-services://?action=download-manifest&url=http://velhaz.hd.free.fr:3000//TestPlan.plist") Install App

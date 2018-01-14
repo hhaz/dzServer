@@ -72,6 +72,44 @@ app.get('/api/findClosestDZ', function(req,res) { // call : http://localhost:300
 
 });
 
+app.get('/', function(req, res){ // http://localhost:3000/api/go?page=1&montantMin=1&montantMax=3
+  DZProvider.getDevicesAndDZ(function(devices,dzs){
+        res.render('home', {
+            title: 'DZ Web Site',
+            devices:devices,
+            dzs:dzs,
+            countdz:dzs.length
+        });
+    }); 
+});
+
+app.post('/sendNotif' ,function(req, res){
+  DZProvider.sendAPN( function (result) {
+    res.send(result + " notifications sent");
+  });
+});
+
+app.post('/upload' ,function(req, res){
+    if(req.files.fileNames.name != '') {
+      if( Array.isArray(req.files.fileNames) ) {
+        req.files.fileNames.forEach( function(elem) {  
+        DZProvider.uploadDocument(elem, function() {
+          });
+        });
+      }
+      else {
+        DZProvider.uploadDocument(req.files.fileNames, function() {
+          });
+      }
+      res.redirect('/');
+    }
+    else
+    {
+      console.log( 'no files');
+      res.redirect('/');
+    }
+}); 
+
 app.get('/api/findAllDZ', function(req,res) { // call : http://localhost:3000/api/findClosestDZ?latitude=48.78646&longitude=2.17189&distance=2000
   var ip = req.headers['x-forwarded-for'] || 
      req.connection.remoteAddress || 
@@ -99,6 +137,13 @@ app.get('/api/notifNewDZ', function(req,res) {
     res.send(result + " notifications sent");
   });
 });
+
+app.get('/api/checkVersion', function(req,res) {  
+  DZProvider.checkVersion( function (result) {
+    res.send(result);
+  });
+});
+
 
 app.listen(3000);
 
